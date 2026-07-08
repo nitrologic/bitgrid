@@ -4,7 +4,7 @@
 
 "use strict"
 
-console.log("gridlife 0.1.5")
+console.log("gridlife 0.1.6")
 
 let gridTick=50000;
 
