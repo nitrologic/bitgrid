@@ -1,5 +1,7 @@
 # bitgrid(width,height,layers)
 
+<img src="media/gridlife1.png" width="800">
+
 * width height layers of single bit pixels
 * 32 bit data words contained in single Uint32Array
 * drawShape stepConwayLife cellular automata
