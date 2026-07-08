@@ -15,8 +15,8 @@ let vidHeight=22;
 function resizeTerminal(){
 	const w=terminal.clientWidth;
 	const h=terminal.clientHeight;
-	vidWidth=4+(w/9)|0;
-	vidHeight=2+(h/16)|0
+	vidWidth=((w/8)|0)-12;	//10
+	vidHeight=((h/15)|0)-2;
 }
 
 const UPDOWN=0;
@@ -320,11 +320,6 @@ function menuWall(blocks){
 function backSpace(){
 //	mainMenu=!mainMenu;
 	draw(glider[0],20,35,2);
-}
-
-function pushStatus(key,value){
-	let text="[STATUS] key:"+key+", value:"+JSON.stringify(value);
-	status.push(text);
 }
 
 function flattenChunks(chunks) {

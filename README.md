@@ -1,8 +1,8 @@
-# bitgrid
+# bitgrid(width,height,layers)
 
 * width height layers of single bit pixels
 * 32 bit data words contained in single Uint32Array
-* drawShape stepConwayLife cellular automata functions incoming
+* drawShape stepConwayLife cellular automata
 
 ## methods
 
