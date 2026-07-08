@@ -1,0 +1,30 @@
+/* gridlife.css */
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0px;
+    background-color: #000;
+    overflow: hidden;
+}
+
+#gridlife {
+    white-space: pre;
+    background-color: #111;
+    width: 100%;
+    height: 100%;
+    font-size: 12px;
+    line-height: 1.25;
+    font-family:
+        "Cascadia Mono",
+        "DejaVu Sans Mono",
+        "Noto Sans Mono",
+        Consolas,
+        "Courier New",
+        "SF Mono",
+        Menlo,
+        monospace,
+        "Apple Color Emoji",
+        "Segoe UI Emoji",
+        "Noto Color Emoji";
+}
