@@ -20,5 +20,4 @@
 
 [Repository](https://github.com/nitrologic/bitgrid)
 
-Visit conway life bitgrid
-[gridlife.html](../gridlife.html)
+Cellular Automata and friends are welcome to visit conway life on [bitgrid](https://nitrologic.github.io/bitgrid)
