@@ -6,6 +6,8 @@
 
 console.log("gridlife 0.1.5")
 
+let gridTick=50000;
+
 let gridWidth=22*8*4;
 let gridHeight=23*8;
 
@@ -113,13 +115,17 @@ function initGridLife(){
 }
 
 let startTime = null;
+let totalElapsed = 0;
 
 function tick(timestamp) {
 	if (!startTime) startTime = timestamp;
 	const elapsed = timestamp - startTime;
-	resizeTerminal();
-	terminal.value=testFrame();
-	requestAnimationFrame(tick);
+	totalElapsed+=elapsed;
+	while(totalElapsed>0){
+		resizeTerminal();
+		terminal.value=testFrame();
+		totalElapsed-=gridTick;
+	}
 	const keys=
 		(pressedKeys["ArrowUp"]?1:0)|
 		(pressedKeys["ArrowDown"]?2:0)|
@@ -127,6 +133,7 @@ function tick(timestamp) {
 		(pressedKeys["ArrowLeft"]?4:0);
 	updatePumps(keys);
 	updateCursor();
+	requestAnimationFrame(tick);
 }
 
 function mirror(shape){
