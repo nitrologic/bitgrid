@@ -3,10 +3,14 @@
 // All rights reserved
 
 "use strict"
+const title="gridlife 0.1.8"
 
-console.log("gridlife 0.1.7")
+let gridTick=12000;
 
-let gridTick=50000;
+function setSpeed(digit){
+	let speed=(1+digit);
+	gridTick=50*(speed*speed);
+}
 
 let gridWidth=22*8*4;
 let gridHeight=23*8;
@@ -50,9 +54,16 @@ function onKeyDown(e){
 		e.preventDefault(); // Stop newline creation
 		console.log("Execute terminal command!");
 	}
-	if (key === "Tab") {
+	else if (key === "Tab") {
 		e.preventDefault(); // Stop focus from leaving the textarea
 		console.log("Trigger auto-complete!");
+	}
+	else if ((key>="0")&&(key<="9")) {
+//		console.log("Number speed",key|0);
+		setSpeed(key|0);
+	}
+	else{
+		console.log("Key Down",{key,code});
 	}
 }
 
@@ -102,7 +113,6 @@ function initGridLife(){
 //	terminal.value+="\n123\n"+friends[1]+"\n";
 	console.log("initGridLife");
 	resizeTerminal();
-	terminal.value=testFrame();
 	requestAnimationFrame(tick);
 	terminal.addEventListener("mousedown",onMouse);
 	terminal.addEventListener("mousemove",onMouseMove);
@@ -118,12 +128,13 @@ let startTime = null;
 let totalElapsed = 0;
 
 function tick(timestamp) {
-	if (!startTime) startTime = timestamp;
-	const elapsed = timestamp - startTime;
+	const millis=performance.now();
+	if (!startTime) startTime = millis;
+	const elapsed = millis - startTime;
 	totalElapsed+=elapsed;
 	while(totalElapsed>0){
 		resizeTerminal();
-		terminal.value=testFrame();
+		terminal.value=title+"\n"+testFrame();
 		totalElapsed-=gridTick;
 	}
 	const keys=
