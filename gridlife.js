@@ -345,7 +345,7 @@ function fadePumps(){
 }
 
 function updatePumps(keys,millis){
-	const m=(millis|0)*0.0004;
+	const m=(millis|0)*0.00004;
 	if(keys&1) pump[UPDOWN]-=100*m;
 	if(keys&2) pump[UPDOWN]+=100*m;
 	if(keys&4) pump[LEFTRIGHT]-=72*m;
