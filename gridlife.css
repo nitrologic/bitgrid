@@ -4,12 +4,12 @@ html, body {
     height: 100%;
     margin: 0;
     padding: 0px;
-    color:white;
     background-color: #000;
     overflow: hidden;
 }
 
 #gridlife {
+    color:white;
     white-space: pre;
     background-color: #111;
     width: 100%;

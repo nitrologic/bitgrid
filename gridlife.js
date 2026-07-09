@@ -3,7 +3,8 @@
 // All rights reserved
 
 "use strict"
-const title="gridlife 0.1.8"
+
+const gridTitle="gridlife 0.2.0";
 
 let gridTick=12000;
 
@@ -134,7 +135,7 @@ function tick(timestamp) {
 	totalElapsed+=elapsed;
 	while(totalElapsed>0){
 		resizeTerminal();
-		terminal.value=title+"\n"+testFrame();
+		terminal.value=gridTitle+"\n"+testFrame();
 		totalElapsed-=gridTick;
 	}
 	const keys=
