@@ -133,10 +133,12 @@ function tick(timestamp) {
 	if (!startTime) startTime = millis;
 	const elapsed = millis - startTime;
 	totalElapsed+=elapsed;
-	while(totalElapsed>0){
+	if(totalElapsed>0){
 		resizeTerminal();
 		terminal.value=gridTitle+"\n"+testFrame();
-		totalElapsed-=gridTick;
+		while(totalElapsed>0){
+			totalElapsed-=gridTick;
+		}
 	}
 	const keys=
 		(pressedKeys["ArrowUp"]?1:0)|
