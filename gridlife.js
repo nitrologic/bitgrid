@@ -2,15 +2,34 @@
 // (c) 2026 nitrlogic
 // All rights reserved
 
+// requestAnimationFrame
+
 "use strict"
 
-const gridTitle="gridlife 0.2.0";
+const gridTitle="gridlife 0.2.3";
+const help="cursor to pan , 0-9 speed";
+function echo(...args){
+	const lines=[];
+	for(const arg of args){
+		const line=arg?.toString();
+		lines.push(line);
+	}
+	const text=lines.join(" ");
+	console.log("[GRIDLIFE]",text);
+}
 
-let gridTick=12000;
+let dotBlocks=["⚫","🟠","🟡","🟢","🔴","🔵","🟣","🟤","🟧","🟨","🟩","🟥","🟦","🟪","🟫","🧡","💛","💚","💙","💜","🤎"];
+const dotBlockWide=2;
+
+const friendEmoji="🐨🐼🐸🐰🐭🐯🐱🐶🐵🐥🐷🦧🐺🦊🦝🦁🦉";
+const friends=[...friendEmoji];
+
+let displayDirty=true;
+let gridTick=0;
 
 function setSpeed(digit){
-	let speed=(1+digit);
-	gridTick=50*(speed*speed);
+	let speed=(digit);
+	gridTick=5*(speed*speed);
 }
 
 let gridWidth=22*8*4;
@@ -19,11 +38,18 @@ let gridHeight=23*8;
 let vidWidth=72*2;
 let vidHeight=22;
 
+// todo - clear display daggs
+
 function resizeTerminal(){
 	const w=terminal.clientWidth;
 	const h=terminal.clientHeight;
-	vidWidth=((w/8)|0)-12;	//10
-	vidHeight=((h/15)|0)-2;
+	let vw=((w/8)|0)-12;	//10
+	let vh=((h/15)|0)-2;
+	if((vidWidth!=vw)||(vidHeight!=vh)){
+		vidWidth=vw;
+		vidHeight=vh;
+		displayDirty=true;
+	}
 }
 
 const UPDOWN=0;
@@ -32,12 +58,33 @@ const LEFTRIGHT=1;
 const pump=[0,0];
 
 let terminal;
+let startTime = performance.now();
+let previousMillis = startTime;
+let totalElapsed = 0;
+let gridTime = 0;
 
-let dotBlocks=["⚫","🟠","🟡","🟢","🔴","🔵","🟣","🟤","🟧","🟨","🟩","🟥","🟦","🟪","🟫","🧡","💛","💚","💙","💜","🤎"];
-const dotBlockWide=2;
+function updateGrid(requestAnimationFrame_timestamp) {	//was tick
+	resizeTerminal();
+	const millis=performance.now();
+	const elapsed = millis - previousMillis;
+	previousMillis=millis;
+	totalElapsed+=elapsed;
+	if(gridTime<totalElapsed){
+		stepFrame();
+		gridTime+=gridTick;
+	}
 
-const friendEmoji="🐨🐼🐸🐰🐭🐯🐱🐶🐵🐥🐷🦧🐺🦊🦝🦁🦉";
-const friends=[...friendEmoji];
+	terminal.value=gridTitle+" "+help+"\n"+frameBlocks();
+
+	const keys=
+		(pressedKeys["ArrowUp"]?1:0)|
+		(pressedKeys["ArrowDown"]?2:0)|
+		(pressedKeys["ArrowRight"]?8:0)|
+		(pressedKeys["ArrowLeft"]?4:0);
+	updatePumps(keys,millis);
+	updateCursor();
+	requestAnimationFrame(updateGrid);
+}
 
 const pressedKeys={};
 
@@ -53,35 +100,53 @@ function onKeyDown(e){
 	pressedKeys[key]=true;
 	if (key === "Enter") {
 		e.preventDefault(); // Stop newline creation
-		console.log("Execute terminal command!");
+		echo("Execute terminal command!");
 	}
 	else if (key === "Tab") {
 		e.preventDefault(); // Stop focus from leaving the textarea
-		console.log("Trigger auto-complete!");
+		echo("Trigger auto-complete!");
 	}
 	else if ((key>="0")&&(key<="9")) {
-//		console.log("Number speed",key|0);
+//		echo("Number speed",key|0);
 		setSpeed(key|0);
 	}
 	else{
-		console.log("Key Down",{key,code});
+		echo("Key Down",{key,code});
 	}
 }
 
-let mouseSensitivity=2;
-function onMouse(e){
-//	console.log({e});
+let mouseLock=false;
+let mouseSensitivity=1.0;
+function inGutter(e){
+	const gutter=50;
+	const x=e.clientX;
+	const y=e.clientY;
+	const mx=0;
+	const my=0;
+	if(x<gutter) mx-=mouseSensitivity;
+	if(y<gutter) my-=mouseSensitivity;
+	return false;
+}
+function onMouseDown(e){
+	e.preventDefault();
+	mouseLock=!mouseLock;
+//	echo({e});
+}
+function onMouseUp(e){
+//	echo({e});
 }
 function onMouseMove(e){
-	e.preventDefault(); // stop scroll hijack
-	if(e.buttons&1){
+	e.preventDefault();
+//	return inGutter(e);
+	if(mouseLock){
 		const x=e.movementX*mouseSensitivity;
 		const y=e.movementY*mouseSensitivity;
 		pump[1]+=x;
 		pump[0]+=y;
-//		console.log({x,y});
+//		echo({x,y});
 	}
 }
+
 
 let previous=[];
 let touchSensitivity=5.0;
@@ -107,47 +172,6 @@ function onTouchMove(e){
 		pump[1]+=touchSensitivity*dx;
 	}
 	previous=[tx,ty];
-}
-
-function initGridLife(){
-	terminal=document.getElementById("gridlife");
-//	terminal.value+="\n123\n"+friends[1]+"\n";
-	console.log("initGridLife");
-	resizeTerminal();
-	requestAnimationFrame(tick);
-	terminal.addEventListener("mousedown",onMouse);
-	terminal.addEventListener("mousemove",onMouseMove);
-	terminal.addEventListener("mouseup",onMouse);
-	terminal.addEventListener("keydown",onKeyDown);
-	terminal.addEventListener("keyup",onKeyUp);
-	terminal.addEventListener("touchmove",onTouchMove);
-	terminal.addEventListener("touchstart",onTouchStart);
-	terminal.addEventListener("touchend",onTouchEnd);
-}
-
-let startTime = null;
-let totalElapsed = 0;
-
-function tick(timestamp) {
-	const millis=performance.now();
-	if (!startTime) startTime = millis;
-	const elapsed = millis - startTime;
-	totalElapsed+=elapsed;
-	if(totalElapsed>0){
-		resizeTerminal();
-		terminal.value=gridTitle+"\n"+testFrame();
-		while(totalElapsed>0){
-			totalElapsed-=gridTick;
-		}
-	}
-	const keys=
-		(pressedKeys["ArrowUp"]?1:0)|
-		(pressedKeys["ArrowDown"]?2:0)|
-		(pressedKeys["ArrowRight"]?8:0)|
-		(pressedKeys["ArrowLeft"]?4:0);
-	updatePumps(keys);
-	updateCursor();
-	requestAnimationFrame(tick);
 }
 
 function mirror(shape){
@@ -320,11 +344,12 @@ function fadePumps(){
 	return previous;
 }
 
-function updatePumps(keys){
-	if(keys&1) pump[UPDOWN]-=100;
-	if(keys&2) pump[UPDOWN]+=100;
-	if(keys&4) pump[LEFTRIGHT]-=72;
-	if(keys&8) pump[LEFTRIGHT]+=72;
+function updatePumps(keys,millis){
+	const m=(millis|0)*0.0004;
+	if(keys&1) pump[UPDOWN]-=100*m;
+	if(keys&2) pump[UPDOWN]+=100*m;
+	if(keys&4) pump[LEFTRIGHT]-=72*m;
+	if(keys&8) pump[LEFTRIGHT]+=72*m;
 	fadePumps();
 }
 
@@ -358,6 +383,22 @@ let layer=0;
 let count=0;
 let entropy=0;
 
+function stepFrame(){
+	count++;
+	if(true){//((count++)&7)==5){
+		layer=1-layer;
+		entropy=bitgrid.stepConwayLife(2+layer,3-layer);
+		bitgrid.heat(3-layer,25);
+	}
+	bitgrid.cool(0.95);
+}
+function frameBlocks(){
+	let panx=cursorX>>1;
+	let pany=cursorY>>2;
+	let blocks=gridDotWindowLayer(bitgrid,dotBlocks,panx,pany,vidWidth/dotBlockWide,vidHeight);
+	return blocks.join("\n");
+}
+
 function testFrame(){
 	count++;
 	if(true){//((count++)&7)==5){
@@ -370,4 +411,21 @@ function testFrame(){
 	let pany=cursorY>>2;
 	let blocks=gridDotWindowLayer(bitgrid,dotBlocks,panx,pany,vidWidth/dotBlockWide,vidHeight);
 	return blocks.join("\n");
+}
+
+function initGridLife(){
+	terminal=document.getElementById("gridlife");
+//	terminal.value+="\n123\n"+friends[1]+"\n";
+	echo("[GRIDLIFE] initGridLife");
+	setSpeed(5);
+	resizeTerminal();
+	requestAnimationFrame(updateGrid);
+	terminal.addEventListener("mousedown",onMouseDown);
+	terminal.addEventListener("mouseup",onMouseUp);
+	terminal.addEventListener("mousemove",onMouseMove);
+	terminal.addEventListener("keydown",onKeyDown);
+	terminal.addEventListener("keyup",onKeyUp);
+	terminal.addEventListener("touchmove",onTouchMove);
+	terminal.addEventListener("touchstart",onTouchStart);
+	terminal.addEventListener("touchend",onTouchEnd);
 }
